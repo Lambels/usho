@@ -9,11 +9,11 @@ import (
 	"syscall"
 
 	"github.com/Lambels/usho/handlers"
-	"github.com/Lambels/usho/repo/file"
+	"github.com/Lambels/usho/repo/mysql"
 )
 
 func main() {
-	r, err := file.New("hello")
+	r, err := mysql.New("root")
 	if err != nil {
 		log.Fatal(err)
 	}
