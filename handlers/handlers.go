@@ -24,7 +24,6 @@ func NewService(r repo.Repo, ctx context.Context) http.Handler {
 
 	postPath.Use(MiddlewareValidateIn)
 	postPath.HandleFunc("/new", s.New)
-	postPath.HandleFunc("/get", s.Get)
 
 	m.HandleFunc("/{to}", s.Redirect).Methods(http.MethodGet)
 
@@ -50,6 +49,8 @@ func (s Service) Redirect(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s Service) New(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("ContentType", "application/json")
+
 	in := r.Context().Value(repo.URLKey{}).(repo.URLRequest)
 
 	in.Intial = strings.TrimSpace(in.Intial)
@@ -68,5 +69,3 @@ func (s Service) New(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
-
-func (s Service) Get(w http.ResponseWriter, r *http.Request) {}
