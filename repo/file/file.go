@@ -133,19 +133,19 @@ func (s *storage) GenerateID(ctx context.Context, d []byte) uint64 {
 
 	go func() {
 		for {
-			// Generate random int64
-			buf := make([]byte, 8)
-			rand.Read(buf)
-			randId := binary.LittleEndian.Uint64(buf)
+			select {
+			case <-ctx.Done():
+				return
 
-			// gorutine checks for id and if id works it pushes id into done
-			go func(ctx context.Context, d []byte, id uint64, done chan uint64) {
-				for {
-					select {
-					case <-ctx.Done():
-						return
+			default:
+				// Generate random int64
+				buf := make([]byte, 8)
+				rand.Read(buf)
+				randId := binary.LittleEndian.Uint64(buf)
 
-					default:
+				// gorutine checks for id and if id works it pushes id into done
+				go func(d []byte, id uint64, done chan uint64) {
+					for {
 						if len(d) == 0 {
 							done <- id
 							return
@@ -161,7 +161,7 @@ func (s *storage) GenerateID(ctx context.Context, d []byte) uint64 {
 						d = d[sizeOfLength:]
 
 						var selId uint64
-						if err := binary.Read(bytes.NewReader(d), binary.LittleEndian, &id); err != nil {
+						if err := binary.Read(bytes.NewReader(d[:sizeOfLength]), binary.LittleEndian, &selId); err != nil {
 							return
 						}
 						d = d[sizeOfLength:]
@@ -171,16 +171,16 @@ func (s *storage) GenerateID(ctx context.Context, d []byte) uint64 {
 							return
 						}
 					}
-				}
 
-			}(ctx, d, randId, done)
+				}(d, randId, done)
+			}
 		}
 	}()
 
 	// waits for id
 	id := <-done
 
-	// kills any other workers checking for ids
+	// kills spawning gorutine
 	cancel()
 	return id
 }
