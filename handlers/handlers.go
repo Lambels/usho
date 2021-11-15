@@ -49,8 +49,6 @@ func (s Service) Redirect(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s Service) New(w http.ResponseWriter, r *http.Request) {
-	w.Header().Add("ContentType", "application/json")
-
 	in := r.Context().Value(repo.URLKey{}).(repo.URLRequest)
 
 	in.Intial = strings.TrimSpace(in.Intial)
