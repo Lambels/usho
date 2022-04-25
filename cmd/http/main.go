@@ -16,7 +16,7 @@ import (
 )
 
 var (
-	db   = flag.Bool("db", false, "indicates wether to use mysql store, if ignored will inmem store")
+	db   = flag.Bool("db", false, "indicates wether to use mysql database, if ignored will use inmem store")
 	dsn  = flag.String("dsn", "", "data source name for mysql database")
 	path = flag.String("path", "./store", "indicates where the file storage should be located")
 )
