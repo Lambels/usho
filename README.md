@@ -43,3 +43,26 @@ Usage of usho:
   -path string
         indicates where the file storage should be located (default "./store")
 ```
+
+# Example
+> Must already have usho server running.
+
+Run:
+```
+curl -X POST -H "Content-Type: application/json" -d '{"initial": "https://www.google.com/"}' http://localhost:8080/url/new
+```
+Response:
+```json
+{
+      "id":8222836908470779670,
+      "intial":"https://www.google.com/",
+      "short":"mYPnfEFot87"
+}
+```
+
+You have created a url shortner for `https://www.google.com/` now to access it run:
+```
+curl -X GET http://localhost:8080/{short}
+curl -X GET http://localhost:8080/mYPnfEFot87
+```
+Or go in your browser at: `http://localhost:8080/mYPnfEFot87`
