@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"log"
 	"net/http"
 	"os"
@@ -9,13 +10,30 @@ import (
 	"syscall"
 
 	"github.com/Lambels/usho/handlers"
+	"github.com/Lambels/usho/repo"
+	"github.com/Lambels/usho/repo/file"
 	"github.com/Lambels/usho/repo/mysql"
 )
 
+var (
+	db   = flag.Bool("db", false, "indicates wether to use mysql store, if ignored will inmem store")
+	dsn  = flag.String("dsn", "", "data source name for mysql database")
+	path = flag.String("path", "./store", "indicates where the file storage should be located")
+)
+
 func main() {
-	r, err := mysql.New("root")
+	flag.Parse()
+	var r repo.Repo
+	var err error
+
+	if *db {
+		r, err = mysql.New(*dsn)
+	} else {
+		r, err = file.New(*path)
+	}
+
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("failed to open store: %v", err)
 	}
 	defer r.Close()
 
@@ -40,7 +58,7 @@ func main() {
 	signal.Notify(sigQuit, os.Interrupt, syscall.SIGTERM)
 
 	sig := <-sigQuit
-	log.Printf("cought signal: %v\n", sig)
+	log.Printf("Cought signal: %v\n", sig)
 	log.Printf("Gracefully shutting down server\n")
 
 	if err := server.Shutdown(ctx); err != nil {
