@@ -95,18 +95,21 @@ func (s *storage) Get(ctx context.Context, in string) (repo.URLResponse, error) 
 			return out, fmt.Errorf("abnormal number of bytes in %s: %d", s.path, len(d))
 		}
 
+		// cut off first uint64
 		var len uint64
 		if err := binary.Read(bytes.NewReader(d[:sizeOfLength]), binary.LittleEndian, &len); err != nil {
 			return out, err
 		}
 		d = d[sizeOfLength:]
 
+		// cut off second uint64
 		var id uint64
 		if err := binary.Read(bytes.NewReader(d), binary.LittleEndian, &id); err != nil {
 			return out, err
 		}
 		d = d[sizeOfLength:]
 
+		// cut off url length
 		URL := string(d[:len])
 		if URL == in {
 			out.ID = id
@@ -125,7 +128,9 @@ func (s *storage) Get(ctx context.Context, in string) (repo.URLResponse, error) 
 	}
 }
 
-func (s *storage) Close() error { return nil }
+func (s *storage) Close() error {
+	return os.Remove(s.path)
+}
 
 func (s *storage) GenerateID(ctx context.Context, d []byte) uint64 {
 	done := make(chan uint64, 1)
